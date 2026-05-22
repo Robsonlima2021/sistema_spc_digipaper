@@ -153,6 +153,24 @@
 
 </div>
 
+<!-- History Modal -->
+<div id="historyModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden border border-slate-200">
+        <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+            <div>
+                <h2 class="text-xl font-bold text-slate-800" id="historyModalTitle">Histórico Completo</h2>
+                <p class="text-sm text-slate-500 mt-1" id="historyModalSub">Carregando...</p>
+            </div>
+            <button onclick="closeHistoryModal()" class="text-slate-400 hover:text-slate-600 bg-white p-2 rounded-full shadow-sm border border-slate-200 transition-colors">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+        <div class="p-0 sm:p-6 overflow-y-auto flex-1 bg-slate-50/50" id="historyModalBody">
+            <!-- Content injected via JS -->
+        </div>
+    </div>
+</div>
+
 <script>
     lucide.createIcons();
 
@@ -343,7 +361,10 @@
                                 <p class="text-xs text-slate-500 font-medium uppercase">Total em Aberto</p>
                                 <p class="text-lg font-bold text-danger">${formatCurrency(cliente.total_aberto)}</p>
                             </div>
-                            <span class="hidden md:inline-flex px-3 py-1 text-xs font-semibold rounded-full bg-slate-100 text-slate-600 border border-slate-200">Ver Contas (${cliente.contas.length})</span>
+                            <button onclick="event.preventDefault(); openHistory('${cliente.codigo}', '${cliente.nome.replace(/'/g, "\\'")}')" class="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-full bg-brand-50 text-brand-800 border border-brand-200 hover:bg-brand-100 transition-colors shadow-sm">
+                                <i data-lucide="history" class="w-3.5 h-3.5"></i> Histórico
+                            </button>
+                            <span class="hidden md:inline-flex px-3 py-1.5 text-xs font-semibold rounded-full bg-slate-100 text-slate-600 border border-slate-200">Ver Contas (${cliente.contas.length})</span>
                             <i data-lucide="chevron-down" class="w-5 h-5 text-slate-400 group-open:rotate-180 transition-transform duration-300"></i>
                         </div>
                     </summary>
@@ -389,6 +410,89 @@
     // Initial load
     fetchDashboard();
     fetchResults();
+    
+    // History Modal Logic
+    const historyModal = document.getElementById('historyModal');
+    const historyModalTitle = document.getElementById('historyModalTitle');
+    const historyModalSub = document.getElementById('historyModalSub');
+    const historyModalBody = document.getElementById('historyModalBody');
+
+    function closeHistoryModal() {
+        historyModal.classList.add('hidden');
+    }
+
+    async function openHistory(codigo, nome) {
+        historyModal.classList.remove('hidden');
+        historyModalTitle.textContent = \`Histórico - \${nome}\`;
+        historyModalSub.textContent = \`Código: \${codigo} | Carregando...\`;
+        historyModalBody.innerHTML = \`
+            <div class="flex justify-center items-center py-12">
+                <div class="loader border-4 border-slate-200 rounded-full w-10 h-10"></div>
+            </div>
+        \`;
+        lucide.createIcons();
+        
+        try {
+            const res = await fetch(\`/api/historico/\${encodeURIComponent(codigo)}\`);
+            if(!res.ok) throw new Error('Erro ao carregar');
+            const data = await res.json();
+            
+            if(data.historico.length === 0) {
+                historyModalBody.innerHTML = \`<div class="text-center text-slate-500 py-8">Nenhum histórico encontrado.</div>\`;
+                historyModalSub.textContent = \`Código: \${codigo} | 0 registros encontrados\`;
+                return;
+            }
+            
+            let html = \`
+                <div class="overflow-x-auto">
+                <table class="w-full min-w-[600px] text-left text-sm text-slate-600 bg-white sm:rounded-xl overflow-hidden shadow-sm border-t sm:border border-slate-200">
+                    <thead class="text-xs text-slate-500 uppercase bg-slate-50 border-b border-slate-200">
+                        <tr>
+                            <th class="px-4 py-3 font-semibold">Vencimento</th>
+                            <th class="px-4 py-3 font-semibold">Conta</th>
+                            <th class="px-4 py-3 font-semibold">Venda</th>
+                            <th class="px-4 py-3 font-semibold">Pagamento</th>
+                            <th class="px-4 py-3 font-semibold text-right">Valor</th>
+                            <th class="px-4 py-3 font-semibold text-right">V. Pago</th>
+                            <th class="px-4 py-3 font-semibold text-center">Situação</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+            \`;
+            
+            let countL = 0;
+            let countA = 0;
+            
+            data.historico.forEach(row => {
+                let sitClass = row.situacao === 'A' ? 'bg-amber-100 text-amber-800 border-amber-200' : 'bg-emerald-100 text-emerald-800 border-emerald-200';
+                let sitText = row.situacao === 'A' ? 'ABERTO' : 'PAGO';
+                if(row.situacao === 'A') countA++; else countL++;
+                
+                html += \`
+                    <tr class="hover:bg-slate-50 transition-colors">
+                        <td class="px-4 py-3 whitespace-nowrap">\${formatDate(row.data_vencimento)}</td>
+                        <td class="px-4 py-3 font-medium text-slate-700">\${row.numero_conta || '-'}</td>
+                        <td class="px-4 py-3 text-slate-500">\${row.venda_numero || '-'}</td>
+                        <td class="px-4 py-3 whitespace-nowrap">\${formatDate(row.data_pagamento)}</td>
+                        <td class="px-4 py-3 whitespace-nowrap text-right font-medium text-slate-800">\${formatCurrency(row.valor)}</td>
+                        <td class="px-4 py-3 whitespace-nowrap text-right text-brand-700 font-bold">\${formatCurrency(row.valor_pago)}</td>
+                        <td class="px-4 py-3 text-center">
+                            <span class="px-2 py-0.5 text-[10px] font-bold rounded border \${sitClass}">\${sitText}</span>
+                        </td>
+                    </tr>
+                \`;
+            });
+            
+            html += \`</tbody></table></div>\`;
+            
+            historyModalBody.innerHTML = html;
+            historyModalSub.innerHTML = \`Código: \${codigo} &nbsp;&bull;&nbsp; <span class="text-emerald-600 font-bold">\${countL} Pagas</span> &nbsp;&bull;&nbsp; <span class="text-amber-600 font-bold">\${countA} em Aberto</span>\`;
+            
+        } catch(e) {
+            historyModalBody.innerHTML = \`<div class="text-center text-danger py-8 font-bold">Erro ao carregar o histórico.</div>\`;
+            historyModalSub.textContent = \`Código: \${codigo}\`;
+        }
+    }
 
 </script>
 </body>

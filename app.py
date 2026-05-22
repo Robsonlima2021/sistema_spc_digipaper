@@ -166,6 +166,38 @@ def search():
         'total_pagina': total_pagina
     })
 
+@app.route('/api/historico/<codigo_cliente>')
+def historico(codigo_cliente):
+    if not session.get('logged_in'):
+        return jsonify({'error': 'Unauthorized'}), 401
+        
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute('''
+        SELECT numero_conta, venda_numero, data_vencimento, data_pagamento, valor, valor_pago, situacao
+        FROM historico
+        WHERE cliente_codigo = ?
+        ORDER BY data_vencimento DESC
+    ''', (codigo_cliente,))
+    
+    historico_rows = cursor.fetchall()
+    conn.close()
+    
+    resultados = []
+    for row in historico_rows:
+        resultados.append({
+            'numero_conta': row['numero_conta'],
+            'venda_numero': row['venda_numero'],
+            'data_vencimento': row['data_vencimento'],
+            'data_pagamento': row['data_pagamento'],
+            'valor': row['valor'],
+            'valor_pago': row['valor_pago'],
+            'situacao': row['situacao']
+        })
+        
+    return jsonify({'historico': resultados})
+
 if __name__ == '__main__':
     if not os.path.exists(DB_PATH):
         print("Banco de dados não encontrado. Rode 'python build_db.py' primeiro.")
