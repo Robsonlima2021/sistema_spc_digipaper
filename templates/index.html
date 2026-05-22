@@ -52,19 +52,19 @@
       }
     </style>
 </head>
-<body class="min-h-screen p-4 md:p-8 font-sans bg-slate-100 text-slate-800">
+<body class="min-h-screen p-4 md:p-8 font-sans bg-slate-50 text-slate-800">
 
     <!-- Decorative background elements -->
     <div class="fixed top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
-        <div class="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-brand-100 blur-3xl opacity-50"></div>
-        <div class="absolute top-1/2 right-0 w-96 h-96 rounded-full bg-slate-200 blur-3xl opacity-50"></div>
+        <div class="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-brand-50 blur-3xl opacity-60"></div>
+        <div class="absolute top-1/2 right-0 w-96 h-96 rounded-full bg-slate-100 blur-3xl opacity-60"></div>
     </div>
 
 <div class="max-w-5xl mx-auto relative">
     
     <!-- Logout Button -->
-    <div class="absolute top-4 right-4 md:top-8 md:right-0">
-        <a href="{{ url_for('logout') }}" class="flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur border border-slate-200 rounded-full text-slate-600 hover:text-danger hover:bg-red-50 hover:border-red-200 transition-all shadow-sm text-sm font-bold">
+    <div class="absolute top-4 right-4 md:top-8 md:right-0 z-50">
+        <a href="/logout" class="flex items-center gap-2 px-4 py-2 bg-white backdrop-blur border border-slate-200 rounded-full text-slate-600 hover:text-danger hover:bg-red-50 hover:border-red-200 transition-all shadow-md text-sm font-bold cursor-pointer">
             <i data-lucide="log-out" class="w-4 h-4"></i>
             Sair
         </a>
