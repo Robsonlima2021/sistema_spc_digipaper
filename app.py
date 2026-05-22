@@ -7,7 +7,7 @@ app.secret_key = 'digipaper_secreto_inforbrasil_2026'
 DB_PATH = 'contas_aberto.db'
 
 # Senha de acesso criativa e segura para o sistema
-APP_PASSWORD = "digi@inforbrasil"
+APP_PASSWORD = "Digi*&098"
 
 def get_db_connection():
     conn = sqlite3.connect(DB_PATH)
