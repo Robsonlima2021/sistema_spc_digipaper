@@ -267,17 +267,28 @@
                 let sitColor = conta.situacao === 'A' ? "bg-amber-500/10 text-amber-400 border-amber-500/20" : "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
                 
                 let itensHtml = '';
-                conta.itens.forEach(item => {
-                    itensHtml += `
-                        <tr class="hover:bg-slate-700/30 transition-colors">
-                            <td class="px-6 py-3 whitespace-nowrap font-medium text-slate-400">${item.codigo}</td>
-                            <td class="px-6 py-3 text-slate-200">${item.descricao}</td>
-                            <td class="px-6 py-3 whitespace-nowrap text-slate-300">${item.qtd}</td>
-                            <td class="px-6 py-3 whitespace-nowrap text-slate-300">${formatCurrency(item.unitario)}</td>
-                            <td class="px-6 py-3 whitespace-nowrap text-right font-medium text-slate-200">${formatCurrency(item.total)}</td>
+                if (conta.itens && conta.itens.length > 0) {
+                    conta.itens.forEach(item => {
+                        itensHtml += `
+                            <tr class="hover:bg-slate-700/30 transition-colors">
+                                <td class="px-6 py-3 whitespace-nowrap font-medium text-slate-400">${item.codigo}</td>
+                                <td class="px-6 py-3 text-slate-200">${item.descricao}</td>
+                                <td class="px-6 py-3 whitespace-nowrap text-slate-300">${item.qtd}</td>
+                                <td class="px-6 py-3 whitespace-nowrap text-slate-300">${formatCurrency(item.unitario)}</td>
+                                <td class="px-6 py-3 whitespace-nowrap text-right font-medium text-slate-200">${formatCurrency(item.total)}</td>
+                            </tr>
+                        `;
+                    });
+                } else {
+                    itensHtml = `
+                        <tr>
+                            <td colspan="5" class="px-6 py-6 text-center font-bold text-brand-400 tracking-widest uppercase bg-brand-900/10 border-t border-b border-brand-500/20">
+                                <i data-lucide="refresh-cw" class="w-5 h-5 inline-block mr-2 -mt-1"></i>
+                                Valor Renegociado
+                            </td>
                         </tr>
                     `;
-                });
+                }
 
                 contasHtml += `
                 <div class="conta bg-slate-800 rounded-xl border border-slate-700 shadow-sm overflow-hidden">
