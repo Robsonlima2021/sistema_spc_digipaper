@@ -34,17 +34,16 @@ echo "[2/5] Criando o Ambiente Virtual Python (venv)..."
 if [ ! -d "venv" ]; then
     python3 -m venv venv
 fi
-source venv/bin/activate
 
 echo ""
 echo "[3/5] Instalando dependências do Python (Flask e Gunicorn)..."
-pip install --upgrade pip
-pip install -r requirements.txt
+venv/bin/pip install --upgrade pip
+venv/bin/pip install -r requirements.txt
 
 echo ""
 echo "[4/5] Processando os dados (Criando o banco SQLite)..."
 if [ -f "build_db.py" ] && [ -f "Relatorio_Contas_Aberto.txt" ]; then
-    python build_db.py
+    venv/bin/python build_db.py
 else
     echo "Aviso: Arquivos base (build_db.py ou Relatorio_Contas_Aberto.txt) não encontrados no diretório atual."
 fi
