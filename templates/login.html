@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="bg-slate-50 text-slate-800 antialiased">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - INADIMPLÊNCIA DIGIPAPER</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: { sans: ['Inter', 'sans-serif'] },
+            colors: { 
+              brand: { 50: '#eff6ff', 100: '#dbeafe', 500: '#3b82f6', 600: '#2563eb', 900: '#1e3a8a' },
+              accent: '#10b981',
+              danger: '#ef4444'
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+      
+      .glass {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        box-shadow: 0 20px 40px -10px rgba(0,0,0,0.1);
+      }
+    </style>
+</head>
+<body class="min-h-screen font-sans bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] bg-slate-100 flex items-center justify-center p-4">
+
+    <!-- Decorative background elements -->
+    <div class="fixed top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
+        <div class="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-brand-500/20 blur-3xl"></div>
+        <div class="absolute bottom-0 right-0 w-full h-96 bg-gradient-to-t from-slate-200/50 to-transparent"></div>
+    </div>
+
+    <div class="w-full max-w-md">
+        
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-white shadow-sm border border-slate-200 mb-6 relative">
+                <div class="absolute inset-0 rounded-full border-4 border-brand-100 opacity-50 scale-110"></div>
+                <i data-lucide="lock" class="w-10 h-10 text-brand-600"></i>
+            </div>
+            <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight mb-2">Acesso Restrito</h1>
+            <p class="text-slate-500 font-medium">INADIMPLÊNCIA DIGIPAPER 2026</p>
+        </div>
+
+        <div class="glass rounded-3xl p-8 sm:p-10 relative overflow-hidden">
+            <!-- inner accent -->
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-brand-500 to-accent"></div>
+
+            <form action="{{ url_for('login') }}" method="POST" class="space-y-6">
+                
+                {% if error %}
+                <div class="bg-red-50 text-danger px-4 py-3 rounded-xl border border-red-100 flex items-center gap-3 animate-pulse">
+                    <i data-lucide="alert-circle" class="w-5 h-5 flex-shrink-0"></i>
+                    <p class="text-sm font-bold">{{ error }}</p>
+                </div>
+                {% endif %}
+
+                <div>
+                    <label for="password" class="block text-sm font-bold text-slate-700 mb-2">Senha de Segurança</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <i data-lucide="key" class="w-5 h-5 text-slate-400"></i>
+                        </div>
+                        <input type="password" name="password" id="password" required autofocus
+                            class="block w-full pl-12 pr-4 py-3.5 rounded-xl border border-slate-200 bg-white/50 text-slate-800 placeholder-slate-400 focus:bg-white focus:ring-4 focus:ring-brand-100 focus:border-brand-500 focus:outline-none transition-all text-lg font-medium tracking-wider" 
+                            placeholder="••••••••">
+                    </div>
+                </div>
+
+                <button type="submit" 
+                    class="w-full flex items-center justify-center gap-2 py-4 px-4 border border-transparent rounded-xl shadow-md text-base font-bold text-white bg-slate-900 hover:bg-brand-600 focus:outline-none focus:ring-4 focus:ring-brand-200 transition-all duration-300 transform hover:-translate-y-0.5">
+                    Desbloquear Sistema
+                    <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                </button>
+                
+            </form>
+        </div>
+        
+        <p class="text-center text-slate-400 text-sm font-medium mt-8">
+            &copy; 2026 INFOBRASIL. Todos os direitos reservados.
+        </p>
+
+    </div>
+
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>
