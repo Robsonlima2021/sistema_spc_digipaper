@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR" class="bg-slate-50 text-slate-800 antialiased">
+<html lang="pt-BR" class="bg-slate-900 text-slate-200 antialiased">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,9 +12,9 @@
           extend: {
             fontFamily: { sans: ['Inter', 'sans-serif'] },
             colors: { 
-              brand: { 50: '#eff6ff', 100: '#dbeafe', 500: '#3b82f6', 600: '#2563eb', 900: '#1e3a8a' },
-              accent: '#10b981',
-              danger: '#ef4444'
+              brand: { 50: '#eef2ff', 100: '#e0e7ff', 500: '#6366f1', 600: '#4f46e5', 900: '#312e81' },
+              accent: '#d946ef',
+              danger: '#f43f5e'
             }
           }
         }
@@ -35,10 +35,11 @@
       }
       
       .glass {
-        background: rgba(255, 255, 255, 0.85);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.3);
+        background: rgba(15, 23, 42, 0.7);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
       }
       
       .loader {
@@ -51,13 +52,19 @@
       }
     </style>
 </head>
-<body class="min-h-screen p-4 md:p-8 font-sans bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] bg-slate-50">
+<body class="min-h-screen p-4 md:p-8 font-sans bg-slate-900 text-slate-200">
+
+    <!-- Decorative background elements -->
+    <div class="fixed top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
+        <div class="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-brand-600/10 blur-3xl"></div>
+        <div class="absolute top-1/2 right-0 w-96 h-96 rounded-full bg-accent/5 blur-3xl"></div>
+    </div>
 
 <div class="max-w-5xl mx-auto relative">
     
     <!-- Logout Button -->
     <div class="absolute top-4 right-4 md:top-8 md:right-0">
-        <a href="{{ url_for('logout') }}" class="flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur border border-slate-200 rounded-full text-slate-500 hover:text-danger hover:bg-red-50 hover:border-red-100 transition-all shadow-sm text-sm font-bold">
+        <a href="{{ url_for('logout') }}" class="flex items-center gap-2 px-4 py-2 bg-slate-800/80 backdrop-blur border border-slate-700 rounded-full text-slate-400 hover:text-danger hover:bg-slate-800 hover:border-red-900/50 transition-all shadow-sm text-sm font-bold">
             <i data-lucide="log-out" class="w-4 h-4"></i>
             Sair
         </a>
@@ -65,11 +72,11 @@
 
     <!-- Header -->
     <header class="mb-8 text-center pt-8">
-        <h1 class="text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight mb-4 drop-shadow-sm uppercase">
+        <h1 class="text-4xl md:text-5xl font-extrabold text-white tracking-tight mb-4 drop-shadow-lg uppercase">
             INADIMPLÊNCIA <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-500 to-accent">DIGIPAPER 2026 (INFOBRASIL)</span>
         </h1>
-        <p class="text-slate-500 text-lg font-medium mb-3">Busca em tempo real no banco de dados SQLite</p>
-        <div class="inline-block bg-blue-50 text-brand-600 text-sm px-4 py-2 rounded-full border border-blue-100 font-medium">
+        <p class="text-slate-400 text-lg font-medium mb-3">Busca em tempo real no banco de dados SQLite</p>
+        <div class="inline-block bg-brand-900/40 text-brand-400 text-sm px-4 py-2 rounded-full border border-brand-500/30 font-medium">
             <i data-lucide="info" class="w-4 h-4 inline mr-1 -mt-0.5"></i>
             A última venda registrada neste banco de dados (tabela VENDAS) ocorreu no dia 31 de Março de 2026 às 18:09:49.
         </div>
@@ -77,22 +84,22 @@
 
     <!-- Dashboard -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <div class="glass rounded-2xl p-6 flex items-center gap-5 shadow-sm border border-slate-200/60">
-            <div class="w-14 h-14 rounded-full bg-brand-100 flex items-center justify-center text-brand-600 shadow-inner">
+        <div class="glass rounded-2xl p-6 flex items-center gap-5">
+            <div class="w-14 h-14 rounded-full bg-brand-900/50 flex items-center justify-center text-brand-400 shadow-inner border border-brand-500/20">
                 <i data-lucide="users" class="w-7 h-7"></i>
             </div>
             <div>
-                <p class="text-sm font-bold text-slate-500 uppercase tracking-wider">Total de Clientes no BD</p>
-                <div class="text-3xl font-extrabold text-slate-800" id="dashClientes">--</div>
+                <p class="text-sm font-bold text-slate-400 uppercase tracking-wider">Total de Clientes no BD</p>
+                <div class="text-3xl font-extrabold text-white" id="dashClientes">--</div>
             </div>
         </div>
         
-        <div class="glass rounded-2xl p-6 flex items-center gap-5 shadow-sm border border-slate-200/60">
-            <div class="w-14 h-14 rounded-full bg-red-50 flex items-center justify-center text-danger shadow-inner">
+        <div class="glass rounded-2xl p-6 flex items-center gap-5">
+            <div class="w-14 h-14 rounded-full bg-rose-900/30 flex items-center justify-center text-danger shadow-inner border border-rose-500/20">
                 <i data-lucide="wallet" class="w-7 h-7"></i>
             </div>
             <div>
-                <p class="text-sm font-bold text-slate-500 uppercase tracking-wider">Total Geral em Aberto</p>
+                <p class="text-sm font-bold text-slate-400 uppercase tracking-wider">Total Geral em Aberto</p>
                 <div class="text-3xl font-extrabold text-danger" id="dashValor">--</div>
             </div>
         </div>
@@ -100,11 +107,11 @@
 
     <!-- Search Bar -->
     <div class="relative max-w-2xl mx-auto mb-8 group">
-        <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none transition-colors group-focus-within:text-brand-500">
-            <i data-lucide="search" class="w-5 h-5 text-slate-400 group-focus-within:text-brand-500 transition-colors"></i>
+        <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none transition-colors group-focus-within:text-brand-400">
+            <i data-lucide="search" class="w-5 h-5 text-slate-500 group-focus-within:text-brand-400 transition-colors"></i>
         </div>
         <input type="text" id="searchInput" 
-            class="block w-full pl-14 pr-6 py-4 rounded-full border border-slate-200 shadow-sm bg-white text-slate-700 placeholder-slate-400 focus:ring-4 focus:ring-brand-100 focus:border-brand-500 focus:outline-none transition-all duration-300 text-lg" 
+            class="block w-full pl-14 pr-6 py-4 rounded-full border border-slate-700 shadow-sm bg-slate-800/80 backdrop-blur text-white placeholder-slate-500 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 focus:outline-none transition-all duration-300 text-lg" 
             placeholder="Buscar por cliente, código ou número da conta..." autocomplete="off">
     </div>
     
@@ -115,13 +122,13 @@
     <div id="errorMsg" class="hidden text-center text-danger font-medium mb-6"></div>
 
     <!-- Results count -->
-    <div id="statsBar" class="hidden mb-6 flex flex-col md:flex-row justify-between items-center gap-4 bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
-        <div class="text-slate-600 font-medium">
-            <span id="resultsCount" class="font-bold text-slate-800">0</span> clientes encontrados
+    <div id="statsBar" class="hidden mb-6 flex flex-col md:flex-row justify-between items-center gap-4 bg-slate-800/80 backdrop-blur p-4 rounded-2xl shadow-sm border border-slate-700">
+        <div class="text-slate-400 font-medium">
+            <span id="resultsCount" class="font-bold text-white">0</span> clientes encontrados
         </div>
         <div class="flex items-center gap-3">
-            <span class="text-slate-500">Subtotal desta página:</span>
-            <span id="totalPagina" class="text-2xl font-bold text-brand-600">R$ 0,00</span>
+            <span class="text-slate-400">Subtotal desta página:</span>
+            <span id="totalPagina" class="text-2xl font-bold text-brand-400">R$ 0,00</span>
         </div>
     </div>
 
@@ -132,11 +139,11 @@
     
     <!-- Pagination -->
     <div id="pagination" class="hidden mt-8 mb-12 flex justify-center items-center gap-4">
-        <button id="btnPrev" class="px-5 py-2.5 rounded-full bg-white border border-slate-200 text-slate-700 font-semibold hover:bg-slate-50 hover:text-brand-600 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">Anterior</button>
-        <div class="text-slate-600 font-medium">
-            Página <span id="pageCurrent" class="font-bold text-slate-800">1</span> de <span id="pageTotal" class="font-bold text-slate-800">1</span>
+        <button id="btnPrev" class="px-5 py-2.5 rounded-full bg-slate-800 border border-slate-700 text-slate-300 font-semibold hover:bg-slate-700 hover:text-brand-400 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">Anterior</button>
+        <div class="text-slate-400 font-medium">
+            Página <span id="pageCurrent" class="font-bold text-white">1</span> de <span id="pageTotal" class="font-bold text-white">1</span>
         </div>
-        <button id="btnNext" class="px-5 py-2.5 rounded-full bg-white border border-slate-200 text-slate-700 font-semibold hover:bg-slate-50 hover:text-brand-600 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">Próxima</button>
+        <button id="btnNext" class="px-5 py-2.5 rounded-full bg-slate-800 border border-slate-700 text-slate-300 font-semibold hover:bg-slate-700 hover:text-brand-400 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">Próxima</button>
     </div>
     
     <!-- Footer Observation -->
@@ -243,10 +250,10 @@
         
         if(data.clientes.length === 0) {
             clientList.innerHTML = `
-                <div class="text-center py-12 bg-white rounded-2xl border border-slate-200">
-                    <i data-lucide="inbox" class="w-16 h-16 text-slate-300 mx-auto mb-4"></i>
-                    <h3 class="text-xl font-bold text-slate-700">Nenhum resultado encontrado</h3>
-                    <p class="text-slate-500 mt-2">Tente buscar por outro nome ou número de conta.</p>
+                <div class="text-center py-12 bg-slate-800/50 rounded-2xl border border-slate-700">
+                    <i data-lucide="inbox" class="w-16 h-16 text-slate-600 mx-auto mb-4"></i>
+                    <h3 class="text-xl font-bold text-white">Nenhum resultado encontrado</h3>
+                    <p class="text-slate-400 mt-2">Tente buscar por outro nome ou número de conta.</p>
                 </div>
             `;
             return;
@@ -257,40 +264,40 @@
             
             let contasHtml = '';
             cliente.contas.forEach(conta => {
-                let sitColor = conta.situacao === 'A' ? "bg-amber-100 text-amber-700 border-amber-200" : "bg-green-100 text-green-700 border-green-200";
+                let sitColor = conta.situacao === 'A' ? "bg-amber-500/10 text-amber-400 border-amber-500/20" : "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
                 
                 let itensHtml = '';
                 conta.itens.forEach(item => {
                     itensHtml += `
-                        <tr class="hover:bg-slate-50/80 transition-colors">
-                            <td class="px-6 py-3 whitespace-nowrap font-medium text-slate-500">${item.codigo}</td>
-                            <td class="px-6 py-3 text-slate-800">${item.descricao}</td>
-                            <td class="px-6 py-3 whitespace-nowrap">${item.qtd}</td>
-                            <td class="px-6 py-3 whitespace-nowrap">${formatCurrency(item.unitario)}</td>
-                            <td class="px-6 py-3 whitespace-nowrap text-right font-medium text-slate-700">${formatCurrency(item.total)}</td>
+                        <tr class="hover:bg-slate-700/30 transition-colors">
+                            <td class="px-6 py-3 whitespace-nowrap font-medium text-slate-400">${item.codigo}</td>
+                            <td class="px-6 py-3 text-slate-200">${item.descricao}</td>
+                            <td class="px-6 py-3 whitespace-nowrap text-slate-300">${item.qtd}</td>
+                            <td class="px-6 py-3 whitespace-nowrap text-slate-300">${formatCurrency(item.unitario)}</td>
+                            <td class="px-6 py-3 whitespace-nowrap text-right font-medium text-slate-200">${formatCurrency(item.total)}</td>
                         </tr>
                     `;
                 });
 
                 contasHtml += `
-                <div class="conta bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-                    <div class="conta-header bg-slate-50 p-4 border-b border-slate-100 flex flex-wrap gap-4 justify-between items-center">
+                <div class="conta bg-slate-800 rounded-xl border border-slate-700 shadow-sm overflow-hidden">
+                    <div class="conta-header bg-slate-800/80 p-4 border-b border-slate-700 flex flex-wrap gap-4 justify-between items-center">
                         <div class="flex items-center gap-3">
-                            <div class="p-2 bg-blue-50 text-blue-600 rounded-lg"><i data-lucide="file-text" class="w-4 h-4"></i></div>
+                            <div class="p-2 bg-brand-900/50 text-brand-400 rounded-lg"><i data-lucide="file-text" class="w-4 h-4"></i></div>
                             <div>
-                                <h3 class="font-bold text-slate-800">Conta Nº ${conta.numero}</h3>
-                                <p class="text-xs text-slate-500 font-medium">Venda: ${conta.venda}</p>
+                                <h3 class="font-bold text-white">Conta Nº ${conta.numero}</h3>
+                                <p class="text-xs text-slate-400 font-medium">Venda: ${conta.venda}</p>
                             </div>
                         </div>
                         <div class="flex flex-wrap items-center gap-3 md:gap-6 text-sm">
-                            <div class="flex items-center gap-1.5 text-slate-600"><i data-lucide="calendar" class="w-4 h-4"></i> ${formatDate(conta.vencimento)}</div>
+                            <div class="flex items-center gap-1.5 text-slate-400"><i data-lucide="calendar" class="w-4 h-4"></i> ${formatDate(conta.vencimento)}</div>
                             <span class="px-2.5 py-0.5 rounded-full text-xs font-bold border ${sitColor}">Situação: ${conta.situacao}</span>
                             <div class="text-lg font-bold text-danger">${formatCurrency(conta.valor_parcela)}</div>
                         </div>
                     </div>
                     <div class="overflow-x-auto">
-                        <table class="w-full text-left text-sm text-slate-600">
-                            <thead class="text-xs text-slate-500 uppercase bg-slate-50 border-b border-slate-200">
+                        <table class="w-full text-left text-sm text-slate-300">
+                            <thead class="text-xs text-slate-400 uppercase bg-slate-800/50 border-b border-slate-700">
                                 <tr>
                                     <th scope="col" class="px-6 py-3 font-semibold">Cód</th>
                                     <th scope="col" class="px-6 py-3 font-semibold">Descrição</th>
@@ -299,7 +306,7 @@
                                     <th scope="col" class="px-6 py-3 font-semibold text-right">Total</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-slate-100">
+                            <tbody class="divide-y divide-slate-700/50">
                                 ${itensHtml}
                             </tbody>
                         </table>
@@ -309,31 +316,31 @@
             });
 
             html += `
-            <div class="cliente glass rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-300 overflow-hidden border border-slate-200/60">
+            <div class="cliente glass rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden">
                 <details class="group">
-                    <summary class="cliente-summary p-5 md:p-6 cursor-pointer flex justify-between items-center bg-white/50 hover:bg-white/80 transition-colors">
+                    <summary class="cliente-summary p-5 md:p-6 cursor-pointer flex justify-between items-center bg-slate-800/30 hover:bg-slate-800/60 transition-colors">
                         <div class="flex items-center gap-4">
-                            <div class="w-10 h-10 rounded-full bg-brand-100 flex items-center justify-center text-brand-600 shadow-inner">
+                            <div class="w-10 h-10 rounded-full bg-brand-900/50 flex items-center justify-center text-brand-400 border border-brand-500/20 shadow-inner">
                                 <i data-lucide="user" class="w-5 h-5"></i>
                             </div>
                             <div>
-                                <span class="text-xl font-bold text-slate-800">${cliente.codigo ? cliente.codigo + ' - ' : ''}${cliente.nome}</span>
+                                <span class="text-xl font-bold text-white">${cliente.codigo ? cliente.codigo + ' - ' : ''}${cliente.nome}</span>
                             </div>
                         </div>
                         <div class="flex items-center gap-3">
                             <div class="text-right hidden sm:block mr-4">
-                                <p class="text-xs text-slate-500 font-medium uppercase">Total em Aberto</p>
+                                <p class="text-xs text-slate-400 font-medium uppercase">Total em Aberto</p>
                                 <p class="text-lg font-bold text-danger">${formatCurrency(cliente.total_aberto)}</p>
                             </div>
-                            <span class="hidden md:inline-flex px-3 py-1 text-xs font-semibold rounded-full bg-slate-100 text-slate-600 border border-slate-200">Ver Contas (${cliente.contas.length})</span>
-                            <i data-lucide="chevron-down" class="w-5 h-5 text-slate-400 group-open:rotate-180 transition-transform duration-300"></i>
+                            <span class="hidden md:inline-flex px-3 py-1 text-xs font-semibold rounded-full bg-slate-700 text-slate-300 border border-slate-600">Ver Contas (${cliente.contas.length})</span>
+                            <i data-lucide="chevron-down" class="w-5 h-5 text-slate-500 group-open:rotate-180 transition-transform duration-300"></i>
                         </div>
                     </summary>
-                    <div class="p-5 md:p-6 bg-slate-50/50 border-t border-slate-100 space-y-6">
+                    <div class="p-5 md:p-6 bg-slate-900/50 border-t border-slate-700 space-y-6">
                         ${contasHtml}
                         
-                        <div class="mt-6 p-4 bg-red-50/50 rounded-xl border border-red-100 flex justify-end items-center gap-3">
-                            <span class="text-slate-600 font-medium">Total do Cliente:</span>
+                        <div class="mt-6 p-4 bg-rose-900/10 rounded-xl border border-rose-500/20 flex justify-end items-center gap-3">
+                            <span class="text-slate-400 font-medium">Total do Cliente:</span>
                             <span class="text-2xl font-bold text-danger tracking-tight">${formatCurrency(cliente.total_aberto)}</span>
                         </div>
                     </div>
