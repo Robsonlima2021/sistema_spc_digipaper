@@ -1,8 +1,8 @@
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for
 import sqlite3
 import os
-import fdb
 import psycopg2
+import datetime
 
 app = Flask(__name__)
 app.secret_key = 'digipaper_secreto_inforbrasil_2026'
@@ -173,57 +173,52 @@ def implantar(cliente_codigo):
     if not session.get('logged_in'):
         return jsonify({'error': 'Unauthorized'}), 401
 
-    FDB_DLL_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'fb_embed', 'fbclient.dll')
-    fdb.load_api(FDB_DLL_PATH)
-    DB_FB_PATH = r"C:\Users\robso\Downloads\DADOSRR.FDB"
-    
-    PG_HOST = "127.0.0.1"
-    PG_USER = "postgres"
-    PG_PASSWORD = "postgres"
-    PG_DB = "control"
+    PG_HOST = os.environ.get('PG_HOST', '192.168.1.156')
+    PG_USER = os.environ.get('PG_USER', 'postgres')
+    PG_PASSWORD = os.environ.get('PG_PASSWORD', 'postgres')
+    PG_DB = os.environ.get('PG_DB', 'control')
 
     try:
-        fb_conn = fdb.connect(dsn=DB_FB_PATH, user="sysdba", password="masterkey", charset="UTF8")
-        fb_cur = fb_conn.cursor()
+        sqlite_conn = get_db_connection()
+        sqlite_cur = sqlite_conn.cursor()
         
+        sqlite_cur.execute('''
+            SELECT c.codigo, c.nome, 
+                   co.numero, co.valor_parcela, co.vencimento
+            FROM clientes c
+            JOIN contas co ON co.cliente_id = c.id
+            WHERE c.codigo = ? AND co.situacao != 'PAGA'
+        ''', (str(cliente_codigo),))
+        
+        records = sqlite_cur.fetchall()
+        sqlite_conn.close()
+        
+        if not records:
+            return jsonify({'success': False, 'message': 'Nenhuma conta em aberto encontrada para este cliente no SQLite.'})
+
         pg_conn = psycopg2.connect(dbname=PG_DB, user=PG_USER, password=PG_PASSWORD, host=PG_HOST)
         pg_cur = pg_conn.cursor()
         
-        # Registrar usuário 1 para que o trigger de log do PostgreSQL não falhe
         pg_cur.execute("SELECT get_usuario(1)")
         
-        # Busca débitos abertos somente do cliente clicado
-        fb_cur.execute('''
-            SELECT c.CLI_CODIGO, c.CLI_NOME, c.CLI_CPF_CNPJ, c.CLI_ENDERECO, c.CLI_BAIRRO, c.CLI_CEP, c.CLI_FONE, c.CLI_DATACADASTRO,
-                   r.REC_NUMERO, r.REC_VALOR, r.REC_DATAVENC
-            FROM CLIENTES c
-            JOIN CONTASRECEBER r ON r.CLI_CODIGO = c.CLI_CODIGO
-            WHERE (r.REC_DATAPAG IS NULL OR r.REC_VALORPAGO < r.REC_VALOR)
-              AND r.REC_SITUACAO = 'A'
-              AND c.CLI_CODIGO = ?
-        ''', (cliente_codigo,))
-        
-        records = fb_cur.fetchall()
-        
-        if not records:
-            return jsonify({'success': False, 'message': 'Nenhuma conta em aberto encontrada para este cliente.'})
-
         parcelas_inseridas = 0
         cliente_processado = False
 
         for row in records:
-            (cli_codigo, cli_nome, cli_cpf_cnpj, cli_end, cli_bairro, cli_cep, cli_fone, cli_datacadastro,
-             rec_numero, rec_valor, rec_datavenc) = row
-             
-            cli_cpf_cnpj = cli_cpf_cnpj if cli_cpf_cnpj else ''
-            cli_nome = cli_nome if cli_nome else 'CLIENTE SEM NOME'
-            cli_end = cli_end if cli_end else ''
-            cli_bairro = cli_bairro if cli_bairro else ''
-            cli_cep = cli_cep if cli_cep else ''
-            cli_fone = cli_fone if cli_fone else ''
+            cli_codigo = row['codigo']
+            cli_nome = row['nome'] if row['nome'] else 'CLIENTE SEM NOME'
+            cli_cpf_cnpj = ''
+            cli_end = ''
+            cli_bairro = ''
+            cli_cep = None
+            cli_fone = ''
+            cli_datacadastro = datetime.date.today()
+            
+            rec_numero = row['numero']
+            rec_valor = row['valor_parcela']
+            rec_datavenc = row['vencimento']
 
             if not cliente_processado:
-                # Busca se o cliente já existe pelo CPF/CNPJ (se tiver) ou pelo Nome
                 if cli_cpf_cnpj:
                     pg_cur.execute("SELECT codigo FROM clientes WHERE cpf_cnpj = %s", (cli_cpf_cnpj,))
                 else:
@@ -239,7 +234,6 @@ def implantar(cliente_codigo):
                         if not pg_cur.fetchone():
                             cli_cep = None
                             
-                    # Usa o sequencial do banco (omitindo o campo codigo)
                     pg_cur.execute('''
                         INSERT INTO clientes (nome, cpf_cnpj, endereco, bairro, cep, fone, datacad)
                         VALUES (%s, %s, %s, %s, %s, %s, %s)
@@ -249,13 +243,10 @@ def implantar(cliente_codigo):
                     
                 cliente_processado = True
                 
-            # Verifica se parcela já foi inserida para evitar duplicação (o código REC_NUMERO está em parcelas.parcela)
             pg_cur.execute("SELECT codigo FROM parcelas WHERE parcela = %s", (rec_numero,))
             if not pg_cur.fetchone():
-                from datetime import date
-                hoje = date.today()
+                hoje = datetime.date.today()
                 
-                # 1. Cria a Fatura Principal (Cabeçalho do Contas a Receber)
                 pg_cur.execute('''
                     INSERT INTO faturas (valor, data, usuario, cliente, cod_vendedor)
                     VALUES (%s, %s, 1, %s, 1)
@@ -263,7 +254,6 @@ def implantar(cliente_codigo):
                 ''', (rec_valor, hoje, cli_codigo_novo))
                 fatura_numero = pg_cur.fetchone()[0]
                 
-                # 2. Cria a Parcela (Detalhe)
                 pg_cur.execute('''
                     INSERT INTO parcelas (parcela, valor, vencimento, usuario)
                     VALUES (%s, %s, %s, 1)
@@ -271,13 +261,11 @@ def implantar(cliente_codigo):
                 ''', (rec_numero, rec_valor, rec_datavenc))
                 parcela_gerada_codigo = pg_cur.fetchone()[0]
                 
-                # 3. Relaciona a Fatura com a Parcela
                 pg_cur.execute('''
                     INSERT INTO faturas_destino (fatura, parcela)
                     VALUES (%s, %s)
                 ''', (fatura_numero, parcela_gerada_codigo))
                 
-                # 4. Relaciona a Parcela com o Cliente
                 pg_cur.execute('''
                     INSERT INTO parcelas_clientes (parcela, cliente)
                     VALUES (%s, %s)
@@ -286,18 +274,15 @@ def implantar(cliente_codigo):
                 parcelas_inseridas += 1
 
         pg_conn.commit()
-        fb_conn.close()
-        pg_conn.close()
-        
-        return jsonify({
-            'success': True, 
-            'message': f'{parcelas_inseridas} parcelas implantadas com sucesso!' if parcelas_inseridas > 0 else 'Todas as parcelas já estavam implantadas no banco PostgreSQL.'
-        })
+        return jsonify({'success': True, 'message': f'{parcelas_inseridas} parcelas importadas com sucesso!'})
 
     except Exception as e:
-        if 'fb_conn' in locals(): fb_conn.close()
-        if 'pg_conn' in locals(): pg_conn.close()
+        if 'pg_conn' in locals():
+            pg_conn.rollback()
         return jsonify({'success': False, 'message': str(e)}), 500
+    finally:
+        if 'pg_cur' in locals(): pg_cur.close()
+        if 'pg_conn' in locals(): pg_conn.close()
 
 if __name__ == '__main__':
     if not os.path.exists(DB_PATH):
